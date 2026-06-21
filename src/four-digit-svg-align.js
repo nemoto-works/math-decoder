@@ -5,7 +5,7 @@ function alignFourDigitDivision() {
   const svg = document.querySelector('.division-svg');
   if (!svg || !isFourDigit) return;
 
-  const shift = 38;
+  const digitShift = 44;
   const groups = [...svg.querySelectorAll('g')];
   groups.forEach((group) => {
     const digit = group.querySelector('text');
@@ -13,19 +13,24 @@ function alignFourDigitDivision() {
     const y = digit.getAttribute('y');
     const isDigitColumn = ['54', '130', '178', '232', '278', '326'].includes(y);
     if (isDigitColumn) {
-      group.setAttribute('transform', `translate(${shift} 0)`);
+      group.setAttribute('transform', `translate(${digitShift} 0)`);
     }
   });
 
+  const band = svg.querySelector('.target-band');
+  if (band) {
+    band.setAttribute('transform', `translate(${digitShift} 0)`);
+  }
+
   const mainLine = svg.querySelector('line.division-line');
   if (mainLine) {
-    mainLine.setAttribute('x1', '134');
-    mainLine.setAttribute('x2', '306');
+    mainLine.setAttribute('x1', '128');
+    mainLine.setAttribute('x2', '314');
   }
 
   const bracket = svg.querySelector('path.no-fill');
   if (bracket) {
-    bracket.setAttribute('d', 'M126 82 C140 112 140 138 126 168');
+    bracket.setAttribute('d', 'M110 82 C124 112 124 138 110 168');
   }
 }
 
