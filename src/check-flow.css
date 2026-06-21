@@ -1,0 +1,67 @@
+.check-card {
+  margin: 10px 0;
+  padding: 12px;
+  border-radius: 18px;
+  background: #111827;
+  color: white;
+}
+
+.check-card .step-label {
+  color: #fde68a;
+}
+
+.check-card h3 {
+  color: white;
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.check-options {
+  display: grid;
+  gap: 8px;
+}
+
+.check-option {
+  width: 100%;
+  text-align: left;
+  background: rgba(255, 255, 255, .12);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, .22);
+}
+
+.check-option.correct {
+  background: #16a34a;
+  border-color: #86efac;
+}
+
+.check-option.wrong {
+  background: #b91c1c;
+  border-color: #fecaca;
+}
+
+.check-message {
+  margin: 10px 0 0;
+  padding: 10px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, .12);
+}
+
+.actions button.primary:disabled {
+  background: #9ca3af;
+  color: #f9fafb;
+  opacity: .75;
+}
+
+.actions button.primary:disabled::after {
+  content: "（確認してね）";
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  margin-top: 2px;
+}
+
+@media (min-width: 760px) {
+  .check-options {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
