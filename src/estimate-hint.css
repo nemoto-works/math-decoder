@@ -1,0 +1,42 @@
+.estimate-hint-card {
+  margin: 10px 0;
+  padding: 12px;
+  border-radius: 18px;
+  background: #fffbeb;
+  border: 2px solid #facc15;
+  color: #111827;
+}
+
+.estimate-hint-card h3 {
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.estimate-steps {
+  display: grid;
+  gap: 8px;
+}
+
+.estimate-steps div {
+  display: grid;
+  gap: 2px;
+  padding: 10px;
+  border-radius: 14px;
+  background: white;
+  border: 1px solid #fde68a;
+}
+
+.estimate-steps strong {
+  font-size: 18px;
+}
+
+.estimate-steps span {
+  font-size: 14px;
+  color: #4b5563;
+}
+
+.estimate-answer {
+  background: #111827 !important;
+  color: white;
+  border-color: #111827 !important;
+}
