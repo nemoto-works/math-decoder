@@ -1,6 +1,20 @@
-/* 4桁÷2桁の筆算を少し広く、ノート上で見やすくする補正 */
+/* 4桁÷2桁の筆算だけを少し広く、ノート上で見やすくする補正 */
 .division-svg {
   max-width: 330px;
+}
+
+.four-digit-active .paper-panel {
+  padding: 6px 0;
+}
+
+.four-digit-active .division-svg {
+  width: min(100%, 350px);
+  max-width: 350px;
+}
+
+.four-digit-active .division-svg text,
+.four-digit-active .svg-digit {
+  font-size: 40px;
 }
 
 @media (max-width: 420px) {
@@ -8,8 +22,13 @@
     width: min(100%, 300px);
   }
 
-  .paper-panel {
-    padding: 2px 0;
+  .four-digit-active .division-svg {
+    width: min(100%, 330px);
+    max-width: 330px;
+  }
+
+  .four-digit-active .paper-panel {
+    padding: 4px 0;
   }
 }
 
