@@ -11,14 +11,16 @@ function addEstimateHint() {
     return;
   }
 
-  if (oldHint) return;
+  const actions = document.querySelector('.actions');
+  const checkCard = document.querySelector('.check-card');
+  if (!actions || !checkCard || !actions.parentElement) return;
 
-  const checkCard = [...document.querySelectorAll('section, div')].find((el) =>
-    (el.textContent || '').includes('確認してから次へ') &&
-    (el.textContent || '').includes('115の中に24は何回入る？')
-  );
-
-  if (!checkCard || !checkCard.parentElement) return;
+  if (oldHint) {
+    if (oldHint.previousElementSibling !== actions) {
+      actions.insertAdjacentElement('afterend', oldHint);
+    }
+    return;
+  }
 
   const hint = document.createElement('section');
   hint.className = 'estimate-hint-card';
@@ -33,7 +35,7 @@ function addEstimateHint() {
     </div>
   `;
 
-  checkCard.parentElement.insertBefore(hint, checkCard);
+  actions.insertAdjacentElement('afterend', hint);
 }
 
 const observer = new MutationObserver(addEstimateHint);
