@@ -1,0 +1,11 @@
+.target-band {
+  fill: #fff59d;
+  stroke: #facc15;
+  stroke-width: 4;
+  filter: drop-shadow(0 0 10px rgba(250, 204, 21, .78));
+}
+
+.division-svg .target-band + .division-line,
+.division-svg .target-band + .division-line + .no-fill {
+  pointer-events: none;
+}
