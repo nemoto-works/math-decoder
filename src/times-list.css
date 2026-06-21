@@ -1,0 +1,19 @@
+.times-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0 14px;
+}
+
+.times-list span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 92px;
+  padding: 8px 10px;
+  border-radius: 999px;
+  background: #111827;
+  color: white;
+  font-weight: 800;
+  font-size: 14px;
+}
