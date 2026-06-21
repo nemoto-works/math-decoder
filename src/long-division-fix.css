@@ -1,0 +1,98 @@
+.long-division {
+  width: 4.9em;
+}
+
+.quotient-row,
+.bar-row,
+.problem-row,
+.work-line {
+  grid-template-columns: 1.1em .35em .55em .55em .55em !important;
+  column-gap: 0;
+}
+
+.quotient-row .digit:nth-child(2) {
+  grid-column: 4;
+}
+
+.quotient-row .digit:nth-child(3) {
+  grid-column: 5;
+}
+
+.bar {
+  grid-column: 3 / 6 !important;
+}
+
+.first-product,
+.first-separator,
+.first-remainder,
+.second-target,
+.second-product,
+.second-separator,
+.final-remainder {
+  padding-left: 0 !important;
+}
+
+.first-product .digit:nth-child(1) {
+  grid-column: 3;
+}
+
+.first-product .digit:nth-child(2) {
+  grid-column: 4;
+}
+
+.first-separator .subbar {
+  grid-column: 3 / 5;
+}
+
+.first-remainder .digit:nth-child(1) {
+  grid-column: 4;
+}
+
+.second-target .digit:nth-child(1),
+.second-product .digit:nth-child(1) {
+  grid-column: 4;
+}
+
+.second-target .digit:nth-child(2),
+.second-product .digit:nth-child(2) {
+  grid-column: 5;
+}
+
+.second-separator .subbar {
+  grid-column: 4 / 6;
+}
+
+.final-remainder .digit:nth-child(1) {
+  grid-column: 5;
+}
+
+.subbar {
+  width: 100%;
+}
+
+.divisor {
+  grid-column: 1;
+}
+
+.bracket {
+  grid-column: 2;
+}
+
+.problem-row .digit:nth-of-type(1) {
+  grid-column: 3;
+}
+
+.problem-row .digit:nth-of-type(2) {
+  grid-column: 4;
+}
+
+.problem-row .digit:nth-of-type(3) {
+  grid-column: 5;
+}
+
+@media (max-width: 420px) {
+  .long-division {
+    width: 4.9em;
+    font-size: clamp(30px, 9.6vw, 44px);
+  }
+}
