@@ -1,42 +1,78 @@
-/* 4桁÷2桁の筆算だけをコンパクトにして、操作ボタンを見える位置へ戻す */
+/* 4桁÷2桁の筆算だけをコンパクトにして、操作ボタンと確認カードを見える位置へ戻す */
 .division-svg {
   max-width: 330px;
 }
 
+.four-digit-active .hero {
+  padding-top: 0;
+}
+
+.four-digit-active .hero h1 {
+  font-size: 20px;
+  margin-bottom: 0;
+}
+
 .four-digit-active .lesson-card {
-  padding: 10px;
+  padding: 9px;
 }
 
 .four-digit-active .lesson-head {
-  gap: 4px;
+  gap: 3px;
 }
 
 .four-digit-active .lesson-head h2 {
-  font-size: 20px;
-  line-height: 1.25;
+  font-size: 19px;
+  line-height: 1.2;
 }
 
 .four-digit-active .paper-panel {
   padding: 0;
+  max-height: 255px;
+  overflow: hidden;
+}
+
+.four-digit-active .spotlight-stage {
+  max-height: 255px;
+  overflow: hidden;
 }
 
 .four-digit-active .division-svg {
-  width: min(100%, 268px);
-  max-width: 268px;
+  width: min(100%, 250px);
+  max-width: 250px;
+  transform: translateY(-18px);
+  transform-origin: center top;
 }
 
 .four-digit-active .division-svg text,
 .four-digit-active .svg-digit {
-  font-size: 38px;
+  font-size: 37px;
 }
 
 .four-digit-active .actions {
-  margin-top: 4px;
+  margin-top: 2px;
 }
 
 .four-digit-active .actions button {
-  min-height: 40px;
-  padding: 8px 6px;
+  min-height: 38px;
+  padding: 7px 6px;
+}
+
+.four-digit-active .check-card {
+  margin-top: 8px;
+  padding: 10px;
+}
+
+.four-digit-active .check-card h3 {
+  font-size: 17px;
+  margin-bottom: 8px;
+}
+
+.four-digit-active .check-options {
+  gap: 6px;
+}
+
+.four-digit-active .check-option {
+  padding: 9px 10px;
 }
 
 @media (max-width: 420px) {
@@ -45,12 +81,14 @@
   }
 
   .four-digit-active .division-svg {
-    width: min(100%, 255px);
-    max-width: 255px;
+    width: min(100%, 238px);
+    max-width: 238px;
+    transform: translateY(-22px);
   }
 
-  .four-digit-active .paper-panel {
-    padding: 0;
+  .four-digit-active .paper-panel,
+  .four-digit-active .spotlight-stage {
+    max-height: 238px;
   }
 }
 
