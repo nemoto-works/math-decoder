@@ -1,0 +1,19 @@
+/* 4桁÷2桁の筆算を少し広く、ノート上で見やすくする補正 */
+.division-svg {
+  max-width: 330px;
+}
+
+@media (max-width: 420px) {
+  .division-svg {
+    width: min(100%, 300px);
+  }
+
+  .paper-panel {
+    padding: 2px 0;
+  }
+}
+
+/* あたりステップが正式STEPになったため、補助カードは通常フローの見た目だけ残す */
+.estimate-hint-card.in-flow {
+  margin: 0;
+}
