@@ -27,19 +27,25 @@
 
 .four-digit-active .paper-panel {
   padding: 0;
-  max-height: 255px;
+  height: 238px;
+  min-height: 0;
+  max-height: 238px;
   overflow: hidden;
 }
 
 .four-digit-active .spotlight-stage {
-  max-height: 255px;
+  height: 238px;
+  min-height: 0;
+  max-height: 238px;
   overflow: hidden;
 }
 
 .four-digit-active .division-svg {
   width: min(100%, 250px);
   max-width: 250px;
-  transform: translateY(-18px);
+  height: 266px;
+  overflow: hidden;
+  transform: translateY(-26px);
   transform-origin: center top;
 }
 
@@ -80,15 +86,17 @@
     width: min(100%, 300px);
   }
 
+  .four-digit-active .paper-panel,
+  .four-digit-active .spotlight-stage {
+    height: 220px;
+    max-height: 220px;
+  }
+
   .four-digit-active .division-svg {
     width: min(100%, 238px);
     max-width: 238px;
-    transform: translateY(-22px);
-  }
-
-  .four-digit-active .paper-panel,
-  .four-digit-active .spotlight-stage {
-    max-height: 238px;
+    height: 252px;
+    transform: translateY(-30px);
   }
 }
 
