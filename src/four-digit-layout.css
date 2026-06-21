@@ -1,20 +1,42 @@
-/* 4桁÷2桁の筆算だけを少し広く、ノート上で見やすくする補正 */
+/* 4桁÷2桁の筆算だけをコンパクトにして、操作ボタンを見える位置へ戻す */
 .division-svg {
   max-width: 330px;
 }
 
+.four-digit-active .lesson-card {
+  padding: 10px;
+}
+
+.four-digit-active .lesson-head {
+  gap: 4px;
+}
+
+.four-digit-active .lesson-head h2 {
+  font-size: 20px;
+  line-height: 1.25;
+}
+
 .four-digit-active .paper-panel {
-  padding: 6px 0;
+  padding: 0;
 }
 
 .four-digit-active .division-svg {
-  width: min(100%, 350px);
-  max-width: 350px;
+  width: min(100%, 268px);
+  max-width: 268px;
 }
 
 .four-digit-active .division-svg text,
 .four-digit-active .svg-digit {
-  font-size: 40px;
+  font-size: 38px;
+}
+
+.four-digit-active .actions {
+  margin-top: 4px;
+}
+
+.four-digit-active .actions button {
+  min-height: 40px;
+  padding: 8px 6px;
 }
 
 @media (max-width: 420px) {
@@ -23,12 +45,12 @@
   }
 
   .four-digit-active .division-svg {
-    width: min(100%, 330px);
-    max-width: 330px;
+    width: min(100%, 255px);
+    max-width: 255px;
   }
 
   .four-digit-active .paper-panel {
-    padding: 4px 0;
+    padding: 0;
   }
 }
 
