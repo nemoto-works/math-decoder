@@ -1,0 +1,48 @@
+.problem-selector {
+  margin: 4px 0 10px;
+  padding: 10px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, .72);
+  border: 1px solid rgba(31, 41, 55, .08);
+}
+
+.problem-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.problem-option {
+  display: grid;
+  gap: 2px;
+  text-align: left;
+  padding: 10px;
+  border-radius: 14px;
+  border: 1px solid #d1d5db;
+  background: #f9fafb;
+}
+
+.problem-option strong {
+  font-size: 16px;
+}
+
+.problem-option span {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.problem-option.selected {
+  background: #111827;
+  color: white;
+  border-color: #111827;
+}
+
+.problem-option.selected span {
+  color: #fde68a;
+}
+
+.coming-soon {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: #6b7280;
+}
