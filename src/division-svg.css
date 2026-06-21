@@ -1,0 +1,63 @@
+.division-svg {
+  display: block;
+  width: min(100%, 360px);
+  height: auto;
+  margin: 0 auto;
+  overflow: visible;
+}
+
+.division-svg text,
+.svg-digit {
+  font-family: "Courier New", ui-monospace, monospace;
+  font-size: 42px;
+  font-weight: 700;
+  fill: rgba(17, 24, 39, .6);
+  text-anchor: middle;
+  dominant-baseline: alphabetic;
+}
+
+.divisor-svg {
+  text-anchor: end;
+}
+
+.division-line {
+  stroke: rgba(17, 24, 39, .75);
+  stroke-width: 5;
+  stroke-linecap: round;
+}
+
+.no-fill {
+  fill: none;
+}
+
+.svg-preview rect {
+  fill: rgba(219, 234, 254, .95);
+  stroke: rgba(59, 130, 246, .9);
+  stroke-width: 3;
+}
+
+.svg-preview text {
+  fill: #1d4ed8;
+}
+
+.svg-spotlight rect {
+  fill: #fff59d;
+  stroke: #facc15;
+  stroke-width: 4;
+  filter: drop-shadow(0 0 10px rgba(250, 204, 21, .85));
+}
+
+.svg-spotlight text {
+  fill: #111827;
+}
+
+@media (max-width: 420px) {
+  .division-svg {
+    width: min(100%, 320px);
+  }
+
+  .division-svg text,
+  .svg-digit {
+    font-size: 40px;
+  }
+}
