@@ -1,0 +1,86 @@
+.hero {
+  padding: 4px 4px 6px;
+}
+
+.hero .eyebrow,
+.hero p {
+  display: none;
+}
+
+.hero h1 {
+  font-size: 22px;
+  margin-bottom: 4px;
+}
+
+.lesson-card {
+  padding: 12px;
+}
+
+.lesson-head {
+  display: grid;
+  gap: 6px;
+}
+
+.lesson-head h2 {
+  font-size: clamp(19px, 5vw, 26px);
+  margin-bottom: 2px;
+}
+
+.lesson-grid {
+  gap: 8px;
+}
+
+.paper-panel {
+  min-height: 0;
+  padding: 4px 0;
+}
+
+.division-svg {
+  width: min(100%, 270px);
+}
+
+.explain-panel {
+  padding: 12px;
+}
+
+.explain-panel h3 {
+  font-size: 15px;
+}
+
+.explain-panel p,
+.next-hint {
+  font-size: 14px;
+}
+
+.actions {
+  position: static;
+  transform: none;
+  width: 100%;
+  margin: 8px 0 0;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.actions button {
+  min-height: 44px;
+}
+
+.actions button.primary {
+  font-size: 18px;
+}
+
+.app {
+  padding-bottom: 20px;
+}
+
+@media (max-width: 420px) {
+  .division-svg {
+    width: min(100%, 250px);
+  }
+
+  .card {
+    margin-bottom: 10px;
+  }
+}
