@@ -1,4 +1,4 @@
-/* 4桁÷2桁の筆算だけをコンパクトにして、操作ボタンと確認カードを見える位置へ戻す */
+/* 4桁÷2桁の筆算は、切り取りよりも正しい筆算表示を優先する */
 .division-svg {
   max-width: 330px;
 }
@@ -27,26 +27,25 @@
 
 .four-digit-active .paper-panel {
   padding: 0;
-  height: 238px;
+  height: auto;
   min-height: 0;
-  max-height: 238px;
-  overflow: hidden;
+  max-height: none;
+  overflow: visible;
 }
 
 .four-digit-active .spotlight-stage {
-  height: 238px;
+  height: auto;
   min-height: 0;
-  max-height: 238px;
-  overflow: hidden;
+  max-height: none;
+  overflow: visible;
 }
 
 .four-digit-active .division-svg {
-  width: min(100%, 250px);
-  max-width: 250px;
-  height: 266px;
-  overflow: hidden;
-  transform: translateY(-26px);
-  transform-origin: center top;
+  width: min(100%, 282px);
+  max-width: 282px;
+  height: auto;
+  overflow: visible;
+  transform: none;
 }
 
 .four-digit-active .division-svg text,
@@ -86,17 +85,11 @@
     width: min(100%, 300px);
   }
 
-  .four-digit-active .paper-panel,
-  .four-digit-active .spotlight-stage {
-    height: 220px;
-    max-height: 220px;
-  }
-
   .four-digit-active .division-svg {
-    width: min(100%, 238px);
-    max-width: 238px;
-    height: 252px;
-    transform: translateY(-30px);
+    width: min(100%, 270px);
+    max-width: 270px;
+    height: auto;
+    transform: none;
   }
 }
 
