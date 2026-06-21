@@ -46,3 +46,34 @@
   font-size: 12px;
   color: #6b7280;
 }
+
+/* 4桁モードでは、問題選択をチップ風に圧縮してファーストビューを確保する */
+.four-digit-active .problem-selector {
+  padding: 8px;
+  margin-bottom: 6px;
+}
+
+.four-digit-active .problem-selector > .step-label,
+.four-digit-active .coming-soon {
+  display: none;
+}
+
+.four-digit-active .problem-options {
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.four-digit-active .problem-option {
+  min-height: 44px;
+  padding: 8px 6px;
+  text-align: center;
+  align-content: center;
+}
+
+.four-digit-active .problem-option strong {
+  font-size: 13px;
+}
+
+.four-digit-active .problem-option span {
+  display: none;
+}
