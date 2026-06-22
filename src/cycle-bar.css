@@ -1,0 +1,49 @@
+.cycle-bar {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+  margin: 8px 0 10px;
+  padding: 8px;
+  border-radius: 18px;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+}
+
+.cycle-step {
+  display: grid;
+  place-items: center;
+  min-height: 34px;
+  border-radius: 999px;
+  background: #e5e7eb;
+  color: #374151;
+  font-size: 13px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.cycle-step.active {
+  background: #111827;
+  color: white;
+  box-shadow: 0 0 0 3px rgba(250, 204, 21, .45);
+}
+
+.cycle-step.dimmed {
+  opacity: .72;
+}
+
+.cycle-step.estimate {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+@media (max-width: 420px) {
+  .cycle-bar {
+    gap: 4px;
+    padding: 6px;
+  }
+
+  .cycle-step {
+    min-height: 30px;
+    font-size: 12px;
+  }
+}
