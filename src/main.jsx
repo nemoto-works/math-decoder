@@ -252,10 +252,8 @@ function Visual({ visual }) {
   return <p>{visual.note}</p>;
 }
 
-function currentQuotientFor(step, problem) {
-  if (step.label === '見る' || step.label === 'あたり') {
-    return problem.rows[step.rowIndex ?? 0]?.q ?? '';
-  }
+function currentQuotientFor(step) {
+  if (step.label === '見る') return '';
   if (step.check?.question.includes('何回')) return step.check.answer;
   if (step.qSoFar) return step.qSoFar.slice(-1);
   return '';
