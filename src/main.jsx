@@ -5,8 +5,9 @@ import './styles.css';
 const problems = [
   { id: '156-12', label: '156 ÷ 12', level: '3桁÷2桁', divisor: 12, dividend: '156', answer: '13', firstTarget: '15', firstQ: '1', firstProduct: '12', firstRemainder: '3', secondTarget: '36', secondQ: '3', secondProduct: '36' },
   { id: '168-12', label: '168 ÷ 12', level: '3桁÷2桁 応用', divisor: 12, dividend: '168', answer: '14', firstTarget: '16', firstQ: '1', firstProduct: '12', firstRemainder: '4', secondTarget: '48', secondQ: '4', secondProduct: '48' },
+  { id: '180-15', label: '180 ÷ 15', level: '3桁÷2桁 応用', divisor: 15, dividend: '180', answer: '12', firstTarget: '18', firstQ: '1', firstProduct: '15', firstRemainder: '3', secondTarget: '30', secondQ: '2', secondProduct: '30' },
   { id: '1152-24', label: '1152 ÷ 24', level: '4桁÷2桁', divisor: 24, dividend: '1152', answer: '48', firstTarget: '115', firstQ: '4', firstProduct: '96', firstRemainder: '19', secondTarget: '192', secondQ: '8', secondProduct: '192', estimate: { nearDivisor: '25', nearProduct: '100', tooMuchQ: '5', tooMuchProduct: '120' } },
-  { id: '10368-24', label: '10368 ÷ 24', level: '5桁÷2桁', type: 'five-lite' },
+  { id: '10368-24', label: '10368 ÷ 24', level: '5桁÷2桁', type: 'five-lite', divisor: 24 },
 ];
 
 const cx = (...classes) => classes.filter(Boolean).join(' ');
@@ -197,6 +198,25 @@ function CycleBar({ active }) {
   return <div className="cycle-bar" aria-label="筆算のサイクル">{cycleLabels.map((label) => <span key={label} className={cx('cycle-step', label === active ? 'active' : 'dimmed')} aria-current={label === active ? 'step' : undefined}>{label}</span>)}</div>;
 }
 
+function MultiplicationCard({ divisor, currentQ, target }) {
+  const activeQ = Number(currentQ);
+  return <section className="times-finder-card" aria-label={`${divisor}の段カード`}>
+    <p className="step-label">{divisor}の段で探す</p>
+    <h3>{target ? `${target}は${divisor}の何回ぶん？` : `${divisor}の段カード`}</h3>
+    <div className="times-finder-list">
+      {Array.from({ length: 9 }, (_, index) => {
+        const q = index + 1;
+        const product = divisor * q;
+        const active = q === activeQ;
+        return <div key={q} className={cx(active && 'times-finder-answer')} aria-current={active ? 'true' : undefined}>
+          <strong>{divisor}×{q}={product}</strong>
+          <span>{active ? `いまの候補。だから${q}回` : target ? (product < Number(target) ? 'まだ足りない' : product > Number(target) ? '大きすぎる' : `ぴったり。だから${q}回`) : '候補'}</span>
+        </div>;
+      })}
+    </div>
+  </section>;
+}
+
 const fiveSteps = [
   { label: '見る', t: 'まず103を見る', q: '', f: ['d0', 'd1', 'd2'], rows: [], ask: '最初に見るのは？', a: '103', c: ['10', '103', '10368'], note: '10だけでは24より小さいので、103を見ます。24≒25、25×4=100なので4回くらいです。' },
   { label: 'たてる', t: '103の中に24は4回', q: '4', f: ['q0'], rows: ['96'], ask: '24×4はいくつ？', a: '96', c: ['72', '96', '120'], note: '24×4=96。24×5=120は103を超えるので、4回です。' },
@@ -229,7 +249,7 @@ function FiveDigitLesson({ onBack }) {
   const step = fiveSteps[index];
   const chosen = choices[index];
   const ok = chosen === step.a;
-  return <main className="five-lite"><header className="hero"><p className="eyebrow">算数デコーダー 5桁</p><h1>10368 ÷ 24</h1><p>筆算は同じ考え方のくり返しです。</p></header><section className="five-lite-card"><p className="step-label">STEP {index + 1} / {fiveSteps.length} ・ {step.label}</p><CycleBar active={cycleLabelFor(step.label)} /><h2>{step.t}</h2><FiveSvg step={step} /><nav className="five-lite-actions"><button type="button" onClick={() => setIndex((value) => Math.max(0, value - 1))} disabled={index === 0}>前へ</button><button type="button" className="primary" onClick={() => ok && setIndex((value) => Math.min(fiveSteps.length - 1, value + 1))} disabled={index === fiveSteps.length - 1 || !ok}>次へ</button><button type="button" onClick={() => { setChoices({}); setIndex(0); }}>最初から</button></nav><section className="five-lite-check"><p className="step-label">確認してから次へ</p><h3>{step.ask}</h3><div className="five-lite-choices">{step.c.map((choice) => <button key={choice} type="button" className={cx('five-lite-choice', chosen === choice && (choice === step.a ? 'ok' : 'ng'))} onClick={() => setChoices((previous) => ({ ...previous, [index]: choice }))}>{choice}</button>)}</div>{chosen && <p>{ok ? '正解です。' : 'もう一度見てみましょう。'}</p>}</section><section className="five-lite-note"><h3>考え方</h3><p>{step.note}</p></section><button type="button" className="five-lite-back" onClick={onBack}>問題選択へ戻る</button></section></main>;
+  return <main className="five-lite"><header className="hero"><p className="eyebrow">算数デコーダー 5桁</p><h1>10368 ÷ 24</h1><p>筆算は同じ考え方のくり返しです。</p></header><section className="five-lite-card"><p className="step-label">STEP {index + 1} / {fiveSteps.length} ・ {step.label}</p><CycleBar active={cycleLabelFor(step.label)} /><h2>{step.t}</h2><FiveSvg step={step} /><nav className="five-lite-actions"><button type="button" onClick={() => setIndex((value) => Math.max(0, value - 1))} disabled={index === 0}>前へ</button><button type="button" className="primary" onClick={() => ok && setIndex((value) => Math.min(fiveSteps.length - 1, value + 1))} disabled={index === fiveSteps.length - 1 || !ok}>次へ</button><button type="button" onClick={() => { setChoices({}); setIndex(0); }}>最初から</button></nav><MultiplicationCard divisor={24} currentQ={step.q.slice(-1)} target={step.ask.includes('24×') ? step.a : undefined} /><section className="five-lite-check"><p className="step-label">確認してから次へ</p><h3>{step.ask}</h3><div className="five-lite-choices">{step.c.map((choice) => <button key={choice} type="button" className={cx('five-lite-choice', chosen === choice && (choice === step.a ? 'ok' : 'ng'))} onClick={() => setChoices((previous) => ({ ...previous, [index]: choice }))}>{choice}</button>)}</div>{chosen && <p>{ok ? '正解です。' : 'もう一度見てみましょう。'}</p>}</section><section className="five-lite-note"><h3>考え方</h3><p>{step.note}</p></section><button type="button" className="five-lite-back" onClick={onBack}>問題選択へ戻る</button></section></main>;
 }
 
 function SvgDigit({ id, x, y, children, step }) {
@@ -279,6 +299,19 @@ function Visual({ visual }) {
   return <p>{visual.note}</p>;
 }
 
+function currentQuotientFor(step) {
+  if (step.q2) return step.q2;
+  if (step.q1) return step.q1;
+  if (step.check?.question.includes('何回入る')) return step.check.answer;
+  return '';
+}
+
+function targetForStep(step, problem) {
+  if (step.q2 || step.check?.question.includes(problem.secondTarget)) return problem.secondTarget;
+  if (step.q1 || step.check?.question.includes(problem.firstTarget)) return problem.firstTarget;
+  return undefined;
+}
+
 function CheckCard({ check, choice, onChoice }) {
   if (!check) return null;
   const selected = check.options.find((option) => option.value === choice);
@@ -309,7 +342,7 @@ function App() {
     setIndex(0);
   }
 
-  return <main className="app"><header className="hero"><p className="eyebrow">算数デコーダー MVP</p><h1>見えない考え方を、見える形に。</h1><p>筆算で「いま、どこを見るのか」をスポットライトで示します。</p></header><ProblemSelector currentProblemId={problem.id} onSelect={selectProblem} /><section className="card lesson-card"><div className="lesson-head"><div><p className="step-label">{problem.label} ・ STEP {index + 1} / {steps.length} ・ {step.label}</p><h2>{step.title}</h2></div><div className="progress"><span style={{ width: `${progress}%` }} /></div></div><CycleBar active={cycleLabelFor(step.label)} /><div className="paper-panel"><LongDivision step={step} problem={problem} /></div><nav className="actions"><button type="button" onClick={() => setIndex((value) => Math.max(0, value - 1))} disabled={index === 0}>前へ</button><button type="button" className="primary" onClick={() => canGoNext && setIndex((value) => Math.min(steps.length - 1, value + 1))} disabled={index === steps.length - 1 || !canGoNext}>次へ</button><button type="button" onClick={() => setIndex(0)}>最初から</button></nav><CheckCard check={step.check} choice={choice} onChoice={(value) => setChoices((previous) => ({ ...previous, [key]: value }))} /><div className="explain-panel"><h3>いま考えること</h3><p>{step.explanation}</p><div className="next-hint"><strong>次に見るところ</strong><span>{step.nextHint}</span></div></div></section><section className="card visual-card"><p className="step-label">ビジュアル補助</p><h2>{step.visualTitle}</h2><Visual visual={step.visual} /></section></main>;
+  return <main className="app"><header className="hero"><p className="eyebrow">算数デコーダー MVP</p><h1>見えない考え方を、見える形に。</h1><p>筆算で「いま、どこを見るのか」をスポットライトで示します。</p></header><ProblemSelector currentProblemId={problem.id} onSelect={selectProblem} /><section className="card lesson-card"><div className="lesson-head"><div><p className="step-label">{problem.label} ・ STEP {index + 1} / {steps.length} ・ {step.label}</p><h2>{step.title}</h2></div><div className="progress"><span style={{ width: `${progress}%` }} /></div></div><CycleBar active={cycleLabelFor(step.label)} /><div className="paper-panel"><LongDivision step={step} problem={problem} /></div><nav className="actions"><button type="button" onClick={() => setIndex((value) => Math.max(0, value - 1))} disabled={index === 0}>前へ</button><button type="button" className="primary" onClick={() => canGoNext && setIndex((value) => Math.min(steps.length - 1, value + 1))} disabled={index === steps.length - 1 || !canGoNext}>次へ</button><button type="button" onClick={() => setIndex(0)}>最初から</button></nav><MultiplicationCard divisor={problem.divisor} currentQ={currentQuotientFor(step)} target={targetForStep(step, problem)} /><CheckCard check={step.check} choice={choice} onChoice={(value) => setChoices((previous) => ({ ...previous, [key]: value }))} /><div className="explain-panel"><h3>いま考えること</h3><p>{step.explanation}</p><div className="next-hint"><strong>次に見るところ</strong><span>{step.nextHint}</span></div></div></section><section className="card visual-card"><p className="step-label">ビジュアル補助</p><h2>{step.visualTitle}</h2><Visual visual={step.visual} /></section></main>;
 }
 
 createRoot(document.getElementById('root')).render(<App />);
