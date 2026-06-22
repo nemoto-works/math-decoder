@@ -252,9 +252,12 @@ function Visual({ visual }) {
   return <p>{visual.note}</p>;
 }
 
-function currentQuotientFor(step) {
-  if (step.qSoFar) return step.qSoFar.slice(-1);
+function currentQuotientFor(step, problem) {
+  if (step.label === '見る' || step.label === 'あたり') {
+    return problem.rows[step.rowIndex ?? 0]?.q ?? '';
+  }
   if (step.check?.question.includes('何回')) return step.check.answer;
+  if (step.qSoFar) return step.qSoFar.slice(-1);
   return '';
 }
 
@@ -316,7 +319,7 @@ function App() {
     }
   }
 
-  return <main className={cx('app', problem.dividend.length === 4 && 'four-digit-active')}><header className="hero"><p className="eyebrow">算数デコーダー MVP</p><h1>見えない考え方を、見える形に。</h1><p>筆算で「いま、どこを見るのか」をスポットライトで示します。</p></header><ProblemSelector currentProblemId={problemId === 'custom' ? problem.id : problemId} onSelect={selectProblem} dividendInput={dividendInput} divisorInput={divisorInput} onDividendInput={setDividendInput} onDivisorInput={setDivisorInput} onStart={startCustomProblem} inputError={inputError} /><section className="card lesson-card"><div className="lesson-head"><div><p className="step-label">{problem.label} ・ STEP {index + 1} / {steps.length} ・ {step.label}</p><h2>{step.title}</h2></div><div className="progress"><span style={{ width: `${progress}%` }} /></div></div><CycleBar active={cycleLabelFor(step.label)} /><div className="paper-panel"><LongDivision step={step} problem={problem} /></div><nav className="actions"><button type="button" onClick={() => setIndex((value) => Math.max(0, value - 1))} disabled={index === 0}>前へ</button><button type="button" className="primary" onClick={() => canGoNext && setIndex((value) => Math.min(steps.length - 1, value + 1))} disabled={index === steps.length - 1 || !canGoNext}>次へ</button><button type="button" onClick={() => setIndex(0)}>最初から</button></nav><MultiplicationCard divisor={problem.divisor} currentQ={currentQuotientFor(step)} target={targetForStep(step, problem)} /><CheckCard check={step.check} choice={choice} onChoice={(value) => setChoices((previous) => ({ ...previous, [key]: value }))} /><div className="explain-panel"><h3>いま考えること</h3><p>{step.explanation}</p><div className="next-hint"><strong>次に見るところ</strong><span>{step.nextHint}</span></div></div></section><section className="card visual-card"><p className="step-label">ビジュアル補助</p><h2>{step.visualTitle}</h2><Visual visual={step.visual} /></section></main>;
+  return <main className={cx('app', problem.dividend.length === 4 && 'four-digit-active')}><header className="hero"><p className="eyebrow">算数デコーダー MVP</p><h1>見えない考え方を、見える形に。</h1><p>筆算で「いま、どこを見るのか」をスポットライトで示します。</p></header><ProblemSelector currentProblemId={problemId === 'custom' ? problem.id : problemId} onSelect={selectProblem} dividendInput={dividendInput} divisorInput={divisorInput} onDividendInput={setDividendInput} onDivisorInput={setDivisorInput} onStart={startCustomProblem} inputError={inputError} /><section className="card lesson-card"><div className="lesson-head"><div><p className="step-label">{problem.label} ・ STEP {index + 1} / {steps.length} ・ {step.label}</p><h2>{step.title}</h2></div><div className="progress"><span style={{ width: `${progress}%` }} /></div></div><CycleBar active={cycleLabelFor(step.label)} /><div className="paper-panel"><LongDivision step={step} problem={problem} /></div><nav className="actions"><button type="button" onClick={() => setIndex((value) => Math.max(0, value - 1))} disabled={index === 0}>前へ</button><button type="button" className="primary" onClick={() => canGoNext && setIndex((value) => Math.min(steps.length - 1, value + 1))} disabled={index === steps.length - 1 || !canGoNext}>次へ</button><button type="button" onClick={() => setIndex(0)}>最初から</button></nav><MultiplicationCard divisor={problem.divisor} currentQ={currentQuotientFor(step, problem)} target={targetForStep(step, problem)} /><CheckCard check={step.check} choice={choice} onChoice={(value) => setChoices((previous) => ({ ...previous, [key]: value }))} /><div className="explain-panel"><h3>いま考えること</h3><p>{step.explanation}</p><div className="next-hint"><strong>次に見るところ</strong><span>{step.nextHint}</span></div></div></section><section className="card visual-card"><p className="step-label">ビジュアル補助</p><h2>{step.visualTitle}</h2><Visual visual={step.visual} /></section></main>;
 }
 
 createRoot(document.getElementById('root')).render(<App />);
