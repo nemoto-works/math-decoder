@@ -281,3 +281,48 @@ button:disabled { opacity: .35; }
 .times-finder-answer span {
   color: #fde68a !important;
 }
+
+.custom-problem-form {
+  display: grid;
+  gap: 10px;
+  margin: 10px 0 12px;
+}
+
+.custom-problem-form label {
+  display: grid;
+  gap: 6px;
+  font-weight: 800;
+}
+
+.custom-problem-form input {
+  width: 100%;
+  border: 2px solid #d1d5db;
+  border-radius: 14px;
+  padding: 14px 12px;
+  font: inherit;
+  font-size: 18px;
+  background: #fff;
+}
+
+.custom-problem-form input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, .14);
+  outline: none;
+}
+
+.input-error {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+  font-weight: 700;
+}
+
+@media (min-width: 760px) {
+  .custom-problem-form {
+    grid-template-columns: 1fr 1fr auto;
+    align-items: end;
+  }
+}
