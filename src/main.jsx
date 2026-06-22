@@ -8,7 +8,7 @@ const problems = [
   { id: '168-12', label: '168 ÷ 12', level: '3桁÷2桁 応用', divisor: 12, dividend: '168', answer: '14', firstTarget: '16', firstQ: '1', firstProduct: '12', firstRemainder: '4', secondTarget: '48', secondQ: '4', secondProduct: '48' },
   { id: '180-15', label: '180 ÷ 15', level: '3桁÷2桁 応用', divisor: 15, dividend: '180', answer: '12', firstTarget: '18', firstQ: '1', firstProduct: '15', firstRemainder: '3', secondTarget: '30', secondQ: '2', secondProduct: '30' },
   { id: '1152-24', label: '1152 ÷ 24', level: '4桁÷2桁', divisor: 24, dividend: '1152', answer: '48', firstTarget: '115', firstQ: '4', firstProduct: '96', firstRemainder: '19', secondTarget: '192', secondQ: '8', secondProduct: '192' },
-  { id: '10368-24', label: '10368 ÷ 24', level: '5桁÷2桁', type: 'five-lite', divisor: 24 },
+  { id: '10368-24', label: '10368 ÷ 24', level: '5桁÷2桁', divisor: 24, dividend: '10368' },
 ];
 
 const cx = (...classes) => classes.filter(Boolean).join(' ');
@@ -29,9 +29,9 @@ const baseState = { q1: '', q2: '', show1: false, showR: false, show2: false, sh
 
 const validateDivisionInput = (dividend, divisor) => {
   if (!/^\d+$/.test(dividend) || !/^\d+$/.test(divisor)) return '整数だけを入力してください。';
-  if (dividend.length < 2) return '割られる数は2桁以上にしてください。';
+  if (dividend.length < 3 || dividend.length > 5) return '割られる数は3〜5桁で入力してください。';
   if (Number(divisor) === 0) return '0では割れません。';
-  if (Number(divisor) < 10 || Number(divisor) > 99) return 'まずは2桁の割る数を入力してください。';
+  if (divisor.length !== 2 || Number(divisor) < 10) return '割る数は2桁で入力してください。';
   if (Number(dividend) < Number(divisor)) return '割られる数は割る数以上にしてください。';
   return '';
 };
@@ -276,8 +276,8 @@ function ProblemSelector({ currentProblemId, onSelect, dividendInput, divisorInp
   return <section className="problem-selector"><p className="step-label">任意の問題を入力</p><form className="custom-problem-form" onSubmit={(event) => { event.preventDefault(); onStart(); }}>
     <label>割られる数<input inputMode="numeric" pattern="[0-9]*" value={dividendInput} onChange={(event) => onDividendInput(event.target.value.replace(/\D/g, ''))} placeholder="1152" /></label>
     <label>割る数<input inputMode="numeric" pattern="[0-9]*" value={divisorInput} onChange={(event) => onDivisorInput(event.target.value.replace(/\D/g, ''))} placeholder="24" /></label>
-    <button type="submit" className="primary">デコード開始</button>
-  </form>{inputError && <p className="input-error" role="alert">{inputError}</p>}<p className="coming-soon">3桁÷2桁、4桁÷2桁、5桁÷2桁に対応。大きな桁数も同じサイクルで生成します。</p><p className="step-label">サンプルから始める</p><div className="problem-options">{problems.filter((problem) => problem.type !== 'five-lite').map((problem) => <button key={problem.id} type="button" className={cx('problem-option', currentProblemId === problem.id && 'selected')} onClick={() => onSelect(problem.id)}><strong>{problem.label}</strong><span>{problem.level}</span></button>)}</div></section>;
+    <button type="submit" className="primary">問題を作成</button>
+  </form>{inputError && <p className="input-error" role="alert">{inputError}</p>}<p className="coming-soon">3桁÷2桁、4桁÷2桁、5桁÷2桁に対応。余りがある問題も同じサイクルで生成します。</p><p className="step-label">サンプルから始める</p><div className="problem-options">{problems.map((problem) => <button key={problem.id} type="button" className={cx('problem-option', currentProblemId === problem.id && 'selected')} onClick={() => onSelect(problem.id)}><strong>{problem.label}</strong><span>{problem.level}</span></button>)}</div></section>;
 }
 
 function App() {
@@ -290,12 +290,13 @@ function App() {
   const selectedProblem = problems.find((item) => item.id === problemId) ?? problems[0];
   const problem = useMemo(() => problemId === 'custom' ? buildDivisionProblem(dividendInput, divisorInput) : buildDivisionProblem(selectedProblem.dividend, String(selectedProblem.divisor)), [dividendInput, divisorInput, problemId, selectedProblem]);
   const steps = useMemo(() => problem.error ? [] : stepsFor(problem), [problem]);
+  const displayError = inputError || problem.error;
 
   const step = steps[index];
   const key = `${problem.id}-${index}`;
   const choice = choices[key];
-  const canGoNext = !step.check || choice === step.check.answer;
-  const progress = Math.round(((index + 1) / steps.length) * 100);
+  const canGoNext = step && (!step.check || choice === step.check.answer);
+  const progress = steps.length ? Math.round(((index + 1) / steps.length) * 100) : 0;
 
   function selectProblem(id) {
     const sample = problems.find((item) => item.id === id);
@@ -319,7 +320,7 @@ function App() {
     }
   }
 
-  return <main className={cx('app', problem.dividend.length === 4 && 'four-digit-active')}><header className="hero"><p className="eyebrow">算数デコーダー MVP</p><h1>見えない考え方を、見える形に。</h1><p>筆算で「いま、どこを見るのか」をスポットライトで示します。</p></header><ProblemSelector currentProblemId={problemId === 'custom' ? problem.id : problemId} onSelect={selectProblem} dividendInput={dividendInput} divisorInput={divisorInput} onDividendInput={setDividendInput} onDivisorInput={setDivisorInput} onStart={startCustomProblem} inputError={inputError} /><section className="card lesson-card"><div className="lesson-head"><div><p className="step-label">{problem.label} ・ STEP {index + 1} / {steps.length} ・ {step.label}</p><h2>{step.title}</h2></div><div className="progress"><span style={{ width: `${progress}%` }} /></div></div><CycleBar active={cycleLabelFor(step.label)} /><div className="paper-panel"><LongDivision step={step} problem={problem} /></div><nav className="actions"><button type="button" onClick={() => setIndex((value) => Math.max(0, value - 1))} disabled={index === 0}>前へ</button><button type="button" className="primary" onClick={() => canGoNext && setIndex((value) => Math.min(steps.length - 1, value + 1))} disabled={index === steps.length - 1 || !canGoNext}>次へ</button><button type="button" onClick={() => setIndex(0)}>最初から</button></nav><MultiplicationCard divisor={problem.divisor} currentQ={currentQuotientFor(step, problem)} target={targetForStep(step, problem)} /><CheckCard check={step.check} choice={choice} onChoice={(value) => setChoices((previous) => ({ ...previous, [key]: value }))} /><div className="explain-panel"><h3>いま考えること</h3><p>{step.explanation}</p><div className="next-hint"><strong>次に見るところ</strong><span>{step.nextHint}</span></div></div></section><section className="card visual-card"><p className="step-label">ビジュアル補助</p><h2>{step.visualTitle}</h2><Visual visual={step.visual} /></section></main>;
+  return <main className={cx('app', problem.dividend?.length === 4 && 'four-digit-active')}><header className="hero"><p className="eyebrow">算数デコーダー MVP</p><h1>見えない考え方を、見える形に。</h1><p>筆算で「いま、どこを見るのか」をスポットライトで示します。</p></header><ProblemSelector currentProblemId={problemId === 'custom' && problem.id ? problem.id : problemId} onSelect={selectProblem} dividendInput={dividendInput} divisorInput={divisorInput} onDividendInput={setDividendInput} onDivisorInput={setDivisorInput} onStart={startCustomProblem} inputError={displayError} />{step && <><section className="card lesson-card"><div className="lesson-head"><div><p className="step-label">{problem.label} ・ STEP {index + 1} / {steps.length} ・ {step.label}</p><h2>{step.title}</h2></div><div className="progress"><span style={{ width: `${progress}%` }} /></div></div><CycleBar active={cycleLabelFor(step.label)} /><div className="paper-panel"><LongDivision step={step} problem={problem} /></div><nav className="actions"><button type="button" onClick={() => setIndex((value) => Math.max(0, value - 1))} disabled={index === 0}>前へ</button><button type="button" className="primary" onClick={() => canGoNext && setIndex((value) => Math.min(steps.length - 1, value + 1))} disabled={index === steps.length - 1 || !canGoNext}>次へ</button><button type="button" onClick={() => setIndex(0)}>最初から</button></nav><MultiplicationCard divisor={problem.divisor} currentQ={currentQuotientFor(step, problem)} target={targetForStep(step, problem)} /><CheckCard check={step.check} choice={choice} onChoice={(value) => setChoices((previous) => ({ ...previous, [key]: value }))} /><div className="explain-panel"><h3>いま考えること</h3><p>{step.explanation}</p><div className="next-hint"><strong>次に見るところ</strong><span>{step.nextHint}</span></div></div></section><section className="card visual-card"><p className="step-label">ビジュアル補助</p><h2>{step.visualTitle}</h2><Visual visual={step.visual} /></section></>}</main>;
 }
 
 createRoot(document.getElementById('root')).render(<App />);
