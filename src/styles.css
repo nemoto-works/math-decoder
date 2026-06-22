@@ -235,3 +235,49 @@ button:disabled { opacity: .35; }
 }
 
 .cycle-step.dimmed { background: rgba(255, 255, 255, .65); }
+.times-finder-card {
+  margin: 10px 0;
+  padding: 12px;
+  border-radius: 18px;
+  background: #ecfeff;
+  border: 2px solid #06b6d4;
+  color: #111827;
+}
+
+.times-finder-card h3 {
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.times-finder-list {
+  display: grid;
+  gap: 8px;
+}
+
+.times-finder-list div {
+  display: grid;
+  gap: 2px;
+  padding: 10px;
+  border-radius: 14px;
+  background: white;
+  border: 1px solid #a5f3fc;
+}
+
+.times-finder-list strong {
+  font-size: 18px;
+}
+
+.times-finder-list span {
+  font-size: 14px;
+  color: #4b5563;
+}
+
+.times-finder-answer {
+  background: #111827 !important;
+  color: white;
+  border-color: #111827 !important;
+}
+
+.times-finder-answer span {
+  color: #fde68a !important;
+}
