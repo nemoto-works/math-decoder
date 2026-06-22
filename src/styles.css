@@ -201,3 +201,37 @@ button:disabled { opacity: .35; }
   .quiz-options { grid-template-columns: repeat(3, 1fr); }
   .actions { position: sticky; bottom: 0; padding: 14px 0 0; background: linear-gradient(transparent, #f6f4ee 20%); }
 }
+
+.cycle-bar {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 5px;
+  margin: 8px 0 12px;
+  padding: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #eef2ff;
+  border: 1px solid #c7d2fe;
+}
+
+.cycle-step {
+  flex: 1 1 0;
+  min-width: 0;
+  text-align: center;
+  white-space: nowrap;
+  border-radius: 999px;
+  padding: 8px 4px;
+  font-size: clamp(12px, 3.4vw, 15px);
+  font-weight: 900;
+  color: #475569;
+  line-height: 1;
+}
+
+.cycle-step.active {
+  color: #fff;
+  background: #2563eb;
+  box-shadow: 0 6px 16px rgba(37, 99, 235, .35);
+}
+
+.cycle-step.dimmed { background: rgba(255, 255, 255, .65); }
