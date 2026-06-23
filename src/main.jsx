@@ -133,7 +133,7 @@ function stepsFor(problem) {
     const common = { rowIndex, qSoFar };
     const beforeQuotientStep = { rowIndex, qSoFar: previousQ };
     return [
-      makeStep({ ...beforeQuotientStep, label: '見る', title: `「${row.target}」を見る`, focus, explanation: `${problem.divisor}が入る、左から一番小さいまとまりを見ます。ここでは${row.target}を見ます。`, nextHint: `次は、${row.target}の中に${problem.divisor}が何回入るかを考えます。`, visualTitle: `${row.target}の中に${problem.divisor}は何回入る？`, visual: { type: 'blocks', total: Number(row.target), group: problem.divisor, remainder: Number(row.remainder), count: Number(row.q), note: `${problem.divisor}が${row.q}回入って、${row.remainder}が残ります。` }, check: { question: 'いま見るまとまりは？', answer: row.target, options: options([[problem.dividend[row.digitIndex], `${problem.dividend[row.digitIndex]}だけ`, '一つの数字だけとは限りません。'], [row.target, row.target, '正解。いま割るまとまりです。'], [problem.dividend, `${problem.dividend}全部`, '全部を一気に見なくても大丈夫です。']]) } }),
+      makeStep({ ...beforeQuotientStep, label: '見る', title: `「${row.target}」を見る`, focus, explanation: `${problem.divisor}が入る、左から一番小さいまとまりを見ます。ここでは${row.target}を見ます。`, nextHint: `次は、${row.target}の中に${problem.divisor}が何回入るかを考えます。`, visualTitle: `${row.target}の中に${problem.divisor}は何回入る？`, visual: { type: 'simple', note: `まずは${row.target}だけを見ます。かける・ひくの結果は次のステップで確認します。` }, check: { question: 'いま見るまとまりは？', answer: row.target, options: options([[problem.dividend[row.digitIndex], `${problem.dividend[row.digitIndex]}だけ`, '一つの数字だけとは限りません。'], [row.target, row.target, '正解。いま割るまとまりです。'], [problem.dividend, `${problem.dividend}全部`, '全部を一気に見なくても大丈夫です。']]) } }),
       makeStep({ ...beforeQuotientStep, label: 'あたり', title: `${problem.divisor}をだいたい${estimate.nearDivisor}として比べる`, focus, explanation: `${problem.divisor}をだいたい${estimate.nearDivisor}として見ると、${estimate.nearDivisor}×${estimate.safeCount}=${estimate.safeProduct}、${estimate.nearDivisor}×${estimate.overCount}=${estimate.overProduct}です。大きくなりすぎない回数を選びます。`, nextHint: `次は、正しい回数を上に書きます。`, visualTitle: 'あたりの比較', visual: { type: 'estimate', divisor: problem.divisor, target: row.target }, check: { question: `${row.target}を超えない最大の回数は？`, answer: row.q, options: options([[low, `${low}回`, `${problem.divisor}×${low}=${problem.divisor * Number(low)}。まだ増やせるか確認しましょう。`], [row.q, `${row.q}回`, `正解。${problem.divisor}×${row.q}=${row.product}です。`], [high, `${high}回`, `${problem.divisor}×${high}=${problem.divisor * Number(high)}で大きすぎます。`]]) } }),
       makeStep({ ...common, label: 'たてる', title: `${row.q}回入るので「${row.q}」を上に書く`, focus: [`q${row.digitIndex}`], preview: rowFocus(row, 'product'), explanation: `${row.target}の中に${problem.divisor}は${row.q}回入ります。だから、見ているまとまりの一番右の数字の上に${row.q}を書きます。`, nextHint: `次は、入った分の${row.product}を書きます。`, visualTitle: `${row.q}回ぶんを上に記録する`, visual: { type: 'simple', note: `答えはここまでで${qSoFar}です。` }, check: { question: `上に書く数字は？`, answer: row.q, options: options([[low, low], [row.q, row.q, '正解。'], [high, high]]) } }),
       makeStep({ ...common, label: 'かける', title: `${row.q} × ${problem.divisor} = ${row.product} を書く`, focus: rowFocus(row, 'product'), explanation: `入った分の${row.product}を書きます。これは次に引くためです。`, nextHint: `次は、${row.target}から${row.product}を引きます。`, visualTitle: '入った分を見えるようにする', visual: { type: 'simple', note: `${problem.divisor}×${row.q}=${row.product}` }, check: { question: `${row.q}回入った分はいくつ？`, answer: row.product, options: options([[row.q, row.q], [row.product, row.product, '正解。'], [row.target, row.target]]) } }),
@@ -214,9 +214,15 @@ function LongDivision({ step, problem }) {
   const xs = problem.dividend.split('').map((_, index) => leftPad + index * digitGap);
   const rowY = (rowIndex, offset = 0) => 178 + rowIndex * 104 + offset;
   const height = Math.max(340, 220 + problem.rows.length * 104);
-  const visibleRows = problem.rows.slice(0, (step.rowIndex ?? 0) + 1);
+  const currentRowIndex = step.rowIndex ?? 0;
+  const visibleRows = problem.rows.slice(0, currentRowIndex + 1);
   const visibleQuotient = step.qSoFar ?? '';
   const qStart = problem.rows[0]?.digitIndex - visibleQuotient.length + 1;
+  const currentRowWork = step.label === 'かける' ? 'product' : step.label === 'ひく' || step.label === '完成' ? 'remainder' : 'none';
+  const visibleWorkForRow = (rowIndex) => {
+    if (rowIndex < currentRowIndex) return 'remainder';
+    return currentRowWork;
+  };
   return <div className="spotlight-stage"><svg className="division-svg" viewBox={`0 0 ${width} ${height}`} role="img" aria-label={`${problem.label} の筆算`}>
     <line className="division-line" x1={leftPad - 20} y1="78" x2={xs[xs.length - 1] + 34} y2="78" />
     <path className="division-line no-fill" d={`M${leftPad - 28} 82 C${leftPad - 14} 112 ${leftPad - 14} 138 ${leftPad - 28} 168`} />
@@ -226,10 +232,12 @@ function LongDivision({ step, problem }) {
     {visibleRows.map((row, index) => {
       const productStart = row.digitIndex - row.product.length + 1;
       const remStart = row.digitIndex - row.remainder.length + 1;
-      const showRemainder = step.label !== 'かける' || index < visibleRows.length - 1;
+      const visibleWork = visibleWorkForRow(index);
+      const showProduct = visibleWork === 'product' || visibleWork === 'remainder';
+      const showRemainder = visibleWork === 'remainder';
       return <g key={`${row.digitIndex}-${index}`}>
-        {row.product.split('').map((digit, digitIndex) => <SvgDigit key={`p-${digitIndex}`} id={`product-${row.digitIndex}-${digitIndex}`} x={xs[productStart + digitIndex]} y={rowY(index)} step={step}>{digit}</SvgDigit>)}
-        <line className="division-line" x1={xs[Math.max(0, productStart)] - 18} y1={rowY(index, 15)} x2={xs[row.digitIndex] + 20} y2={rowY(index, 15)} />
+        {showProduct && row.product.split('').map((digit, digitIndex) => <SvgDigit key={`p-${digitIndex}`} id={`product-${row.digitIndex}-${digitIndex}`} x={xs[productStart + digitIndex]} y={rowY(index)} step={step}>{digit}</SvgDigit>)}
+        {showRemainder && <line className="division-line" x1={xs[Math.max(0, productStart)] - 18} y1={rowY(index, 15)} x2={xs[row.digitIndex] + 20} y2={rowY(index, 15)} />}
         {showRemainder && row.remainder.split('').map((digit, digitIndex) => <SvgDigit key={`r-${digitIndex}`} id={`remainder-${row.digitIndex}-${digitIndex}`} x={xs[Math.max(0, remStart + digitIndex)]} y={rowY(index, 54)} step={step}>{digit}</SvgDigit>)}
       </g>;
     })}
