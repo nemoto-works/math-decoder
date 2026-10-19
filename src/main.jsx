@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import './styles.css';
 import './estimate-hint.css';
@@ -13,7 +13,14 @@ const problems = [
 
 const cx = (...classes) => classes.filter(Boolean).join(' ');
 const toNumber = (value) => Number(value);
-const options = (items) => items.map(([value, label, message]) => ({ value: String(value), label, message }));
+const options = (items) => {
+  const unique = new Map();
+  for (const item of items) {
+    const key = String(item[0]);
+    if (!unique.has(key) || item[2]?.startsWith('正解')) unique.set(key, item);
+  }
+  return [...unique.values()].map(([value, label, message]) => ({ value: String(value), label, message }));
+};
 const firstEnd = (problem) => problem.firstTarget.length - 1;
 const digitFocusRange = (from, to) => Array.from({ length: to - from + 1 }, (_, index) => `d${from + index}`);
 const xPositions = (problem) => problem.dividend.length === 4 ? [104, 150, 196, 242] : [132, 184, 236];
@@ -29,6 +36,7 @@ const baseState = { q1: '', q2: '', show1: false, showR: false, show2: false, sh
 
 const validateDivisionInput = (dividend, divisor) => {
   if (!/^\d+$/.test(dividend) || !/^\d+$/.test(divisor)) return '整数だけを入力してください。';
+  if (dividend.startsWith('0')) return '割られる数の先頭に0はつけないでください。';
   if (dividend.length < 3 || dividend.length > 5) return '割られる数は3〜5桁で入力してください。';
   if (Number(divisor) === 0) return '0では割れません。';
   if (divisor.length !== 2 || Number(divisor) < 10) return '割る数は2桁で入力してください。';
@@ -110,7 +118,10 @@ function EstimateComparisonCard({ divisor, target }) {
       <div className="estimate-near"><strong>{estimate.divisor}≒{estimate.nearDivisor}</strong><span>{estimate.divisor}を近い数にして、暗算しやすくします。</span></div>
       <div className="estimate-row safe"><strong>{estimate.nearDivisor}×{estimate.safeCount}={estimate.safeProduct}</strong><span>← まだ{estimate.target}を超えていない</span></div>
       <div className="estimate-row over"><strong>{estimate.nearDivisor}×{estimate.overCount}={estimate.overProduct}</strong><span>← {estimate.target}を超えている</span></div>
-      <div className="estimate-answer"><strong>だから{estimate.safeCount}回</strong><span>大きくなりすぎる1つ前を選びます。</span></div>
+      <div className="estimate-answer"><strong>あたりは{estimate.safeCount}回くらい</strong><span>これは目安です。元の{estimate.divisor}で確かめます。</span></div>
+      <div className="estimate-row safe"><strong>{estimate.divisor}×{Math.floor(estimate.target / estimate.divisor)}={estimate.divisor * Math.floor(estimate.target / estimate.divisor)}</strong><span>← 元の数でも超えない</span></div>
+      <div className="estimate-row over"><strong>{estimate.divisor}×{Math.floor(estimate.target / estimate.divisor) + 1}={estimate.divisor * (Math.floor(estimate.target / estimate.divisor) + 1)}</strong><span>← もう1回増やすと超える</span></div>
+      <p>確かめると{Math.floor(estimate.target / estimate.divisor)}回です。</p>
     </div>
   </section>;
 }
@@ -122,7 +133,7 @@ function makeStep(overrides) {
 
 function stepsFor(problem) {
   return problem.rows.flatMap((row, rowIndex) => {
-    const focus = targetFocus(row);
+    const focus = rowIndex === 0 ? targetFocus(row) : [...rowFocus(problem.rows[rowIndex - 1], 'remainder'), `down-${problem.rows[rowIndex - 1].digitIndex}`];
     const estimate = buildEstimateComparison({ divisor: problem.divisor, target: row.target });
     const qSoFar = quotientSoFar(problem, rowIndex);
     const isLast = rowIndex === problem.rows.length - 1;
@@ -133,12 +144,12 @@ function stepsFor(problem) {
     const common = { rowIndex, qSoFar };
     const beforeQuotientStep = { rowIndex, qSoFar: previousQ };
     return [
-      makeStep({ ...beforeQuotientStep, label: '見る', title: `「${row.target}」を見る`, focus, explanation: `${problem.divisor}が入る、左から一番小さいまとまりを見ます。ここでは${row.target}を見ます。`, nextHint: `次は、${row.target}の中に${problem.divisor}が何回入るかを考えます。`, visualTitle: `${row.target}の中に${problem.divisor}は何回入る？`, visual: { type: 'simple', note: `まずは${row.target}だけを見ます。かける・ひくの結果は次のステップで確認します。` }, check: { question: 'いま見るまとまりは？', answer: row.target, options: options([[problem.dividend[row.digitIndex], `${problem.dividend[row.digitIndex]}だけ`, '一つの数字だけとは限りません。'], [row.target, row.target, '正解。いま割るまとまりです。'], [problem.dividend, `${problem.dividend}全部`, '全部を一気に見なくても大丈夫です。']]) } }),
+      makeStep({ ...beforeQuotientStep, label: '見る', title: `「${row.target}」を見る`, focus, explanation: `${problem.divisor}が入る、左から一番小さいまとまりを見ます。ここでは${row.target}を見ます。`, nextHint: `次は、${row.target}の中に${problem.divisor}が何回入るかを考えます。`, visualTitle: `${row.target}の中に${problem.divisor}は何回入る？`, visual: { type: 'simple', note: `まずは${row.target}だけを見ます。かける・ひくの結果は次のステップで確認します。` }, check: { question: 'いま見るまとまりは？', answer: row.target, options: options([[problem.dividend[rowIndex === 0 ? 0 : row.digitIndex], `${problem.dividend[rowIndex === 0 ? 0 : row.digitIndex]}だけ`, '一つの数字だけとは限りません。'], [row.target, row.target, '正解。いま割るまとまりです。'], [problem.dividend, `${problem.dividend}全部`, '全部を一気に見なくても大丈夫です。']]) } }),
       makeStep({ ...beforeQuotientStep, label: 'あたり', title: `${problem.divisor}をだいたい${estimate.nearDivisor}として比べる`, focus, explanation: `${problem.divisor}をだいたい${estimate.nearDivisor}として見ると、${estimate.nearDivisor}×${estimate.safeCount}=${estimate.safeProduct}、${estimate.nearDivisor}×${estimate.overCount}=${estimate.overProduct}です。大きくなりすぎない回数を選びます。`, nextHint: `次は、正しい回数を上に書きます。`, visualTitle: 'あたりの比較', visual: { type: 'estimate', divisor: problem.divisor, target: row.target }, check: { question: `${row.target}を超えない最大の回数は？`, answer: row.q, options: options([[low, `${low}回`, `${problem.divisor}×${low}=${problem.divisor * Number(low)}。まだ増やせるか確認しましょう。`], [row.q, `${row.q}回`, `正解。${problem.divisor}×${row.q}=${row.product}です。`], [high, `${high}回`, `${problem.divisor}×${high}=${problem.divisor * Number(high)}で大きすぎます。`]]) } }),
-      makeStep({ ...common, label: 'たてる', title: `${row.q}回入るので「${row.q}」を上に書く`, focus: [`q${row.digitIndex}`], preview: rowFocus(row, 'product'), explanation: `${row.target}の中に${problem.divisor}は${row.q}回入ります。だから、見ているまとまりの一番右の数字の上に${row.q}を書きます。`, nextHint: `次は、入った分の${row.product}を書きます。`, visualTitle: `${row.q}回ぶんを上に記録する`, visual: { type: 'simple', note: `答えはここまでで${qSoFar}です。` }, check: { question: `上に書く数字は？`, answer: row.q, options: options([[low, low], [row.q, row.q, '正解。'], [high, high]]) } }),
+      makeStep({ ...common, label: 'たてる', title: `${row.q}回入るので「${row.q}」を上に書く`, focus: [`q${row.digitIndex}`], preview: rowFocus(row, 'product'), explanation: `${row.target}の中に${problem.divisor}は${row.q}回入ります。だから、見ているまとまりの一番右の数字の上に${row.q}を書きます。`, nextHint: `次は、入った分の${row.product}を書きます。`, visualTitle: `${row.q}回ぶんを上に記録する`, visual: { type: 'simple', note: `いま見ているまとまりの右端の上に${row.q}を書きました。最後まで計算して答えを確かめます。` }, check: { question: `上に書く数字は？`, answer: row.q, options: options([[low, low], [row.q, row.q, '正解。'], [high, high]]) } }),
       makeStep({ ...common, label: 'かける', title: `${row.q} × ${problem.divisor} = ${row.product} を書く`, focus: rowFocus(row, 'product'), explanation: `入った分の${row.product}を書きます。これは次に引くためです。`, nextHint: `次は、${row.target}から${row.product}を引きます。`, visualTitle: '入った分を見えるようにする', visual: { type: 'simple', note: `${problem.divisor}×${row.q}=${row.product}` }, check: { question: `${row.q}回入った分はいくつ？`, answer: row.product, options: options([[row.q, row.q], [row.product, row.product, '正解。'], [row.target, row.target]]) } }),
       makeStep({ ...common, label: 'ひく', title: `${row.target} − ${row.product} = ${row.remainder}`, focus: rowFocus(row, 'remainder'), explanation: `${row.target}から、入った分の${row.product}を引きます。残りは${row.remainder}です。`, nextHint: isLast ? 'これで最後まで計算できました。' : `次は、まだ使っていない${row.downDigit}をおろします。`, visualTitle: `残りは${row.remainder}`, visual: { type: 'simple', note: isLast ? `最終的な余りは${row.remainder}です。` : `残った${row.remainder}は、次の数字${row.downDigit}と組み合わせます。` }, check: isLast ? undefined : { question: `次におろす数字は？`, answer: row.downDigit, options: options([[problem.dividend[row.digitIndex], problem.dividend[row.digitIndex]], [row.downDigit, row.downDigit, '正解。'], [row.remainder, row.remainder]]) } }),
-      ...(!isLast ? [makeStep({ ...common, rowIndex: rowIndex + 1, label: 'おろす', title: `余り${row.remainder}と${row.downDigit}を合わせて、${nextTarget}を見る`, focus: targetFocus(problem.rows[rowIndex + 1]), explanation: `「${row.downDigit}を下ろす」は、余り${row.remainder}の右に次の数字をつけて${nextTarget}という新しいまとまりを作ることです。`, nextHint: `次は、${nextTarget}の中に${problem.divisor}が何回入るかを考えます。`, visualTitle: `${row.remainder} + ${row.downDigit} → ${nextTarget}`, visual: { type: 'combine', left: row.remainder, right: row.downDigit, result: nextTarget, note: '足し算ではなく、右に数字をつけます。' } })] : [makeStep({ ...common, label: '完成', title: `${problem.dividend} ÷ ${problem.divisor} = ${problem.answer}`, focus: problem.rows.map((item) => `q${item.digitIndex}`), explanation: `答えは${problem.answer}です。`, nextHint: '別の問題も入力して試してみましょう。', visualTitle: '筆算の流れ', visual: { type: 'flow', note: '見る → あたり → たてる → かける → ひく → おろす。筆算はこのくり返しです。' } })]),
+      ...(!isLast ? [makeStep({ ...common, rowIndex: rowIndex + 1, label: 'おろす', title: `余り${row.remainder}と${row.downDigit}を合わせて、${nextTarget}を見る`, focus: [...rowFocus(row, 'remainder'), `down-${row.digitIndex}`, `d${problem.rows[rowIndex + 1].digitIndex}`], explanation: `「${row.downDigit}を下ろす」は、余り${row.remainder}の右に次の数字をつけて${nextTarget}という新しいまとまりを作ることです。`, nextHint: `次は、${nextTarget}の中に${problem.divisor}が何回入るかを考えます。`, visualTitle: `余り${row.remainder}の右に${row.downDigit} → ${nextTarget}`, visual: { type: 'combine', left: row.remainder, right: row.downDigit, result: nextTarget, note: '足し算ではなく、右に数字をつけます。' } })] : [makeStep({ ...common, label: '完成', title: `${problem.dividend} ÷ ${problem.divisor} = ${problem.answer}`, focus: problem.rows.map((item) => `q${item.digitIndex}`), explanation: `答えは${problem.answer}です。`, nextHint: '別の問題も入力して試してみましょう。', visualTitle: '筆算の流れ', visual: { type: 'flow', note: '見る → あたり → たてる → かける → ひく → おろす。筆算はこのくり返しです。' } })]),
     ];
   });
 }
@@ -153,10 +164,10 @@ function MultiplicationCard({ divisor, currentQ, target }) {
     <p className="step-label">{divisor}の段で探す</p>
     <h3>{target ? `${target}は${divisor}の何回ぶん？` : `${divisor}の段カード`}</h3>
     <div className="times-finder-list">
-      {Array.from({ length: 9 }, (_, index) => {
-        const q = index + 1;
+      {Array.from({ length: Number(target) < divisor ? 10 : 9 }, (_, index) => {
+        const q = index + (Number(target) < divisor ? 0 : 1);
         const product = divisor * q;
-        const active = q === activeQ;
+        const active = currentQ !== '' && q === activeQ;
         return <div key={q} className={cx(active && 'times-finder-answer')} aria-current={active ? 'true' : undefined}>
           <strong>{divisor}×{q}={product}</strong>
           <span>{active ? `いまの候補。だから${q}回` : target ? (product < Number(target) ? 'まだ足りない' : product > Number(target) ? '大きすぎる' : `ぴったり。だから${q}回`) : '候補'}</span>
@@ -164,71 +175,6 @@ function MultiplicationCard({ divisor, currentQ, target }) {
       })}
     </div>
   </section>;
-}
-
-const fiveSteps = [
-  { label: '見る', t: 'まず103を見る', q: '', f: ['d0', 'd1', 'd2'], rows: [], ask: '最初に見るのは？', a: '103', c: ['10', '103', '10368'], note: '10だけでは24より小さいので、103を見ます。24≒25、25×4=100なので4回くらいです。' },
-  { label: 'たてる', t: '103の中に24は4回', q: '4', f: ['q0'], rows: ['96'], ask: '24×4はいくつ？', a: '96', c: ['72', '96', '120'], note: '24×4=96。24×5=120は103を超えるので、4回です。' },
-  { label: 'おろす', t: '103−96=7、6をおろして76', q: '4', f: ['row2-0', 'd3'], rows: ['96', '7', '76'], ask: '7と6を合わせると？', a: '76', c: ['13', '76', '6'], note: '足し算ではなく、7の右に6をつけて76として見ます。' },
-  { label: 'かける', t: '76の中に24は3回', q: '43', f: ['q1'], rows: ['96', '7', '76', '72', '4'], ask: '24×3はいくつ？', a: '72', c: ['48', '72', '96'], note: '24×3=72。24×4=96は76を超えるので、3回です。' },
-  { label: 'ひく', t: '48の中に24は2回、完成', q: '432', f: ['q2'], rows: ['96', '7', '76', '72', '4', '48', '48', '0'], ask: '答えは？', a: '432', c: ['423', '432', '442'], note: '同じ流れを3回くり返しました。10368÷24=432です。' },
-];
-
-function FiveSvgDigit({ id, x, y, value, step }) {
-  const active = step.f.includes(id);
-  const preview = id[0] === 'q' && value;
-  return <g className={cx(active && 'spot', !active && preview && 'preview')}>{(active || preview) && <rect x={x - 17} y={y - 33} width="34" height="40" rx="8" />}<text x={x} y={y}>{value}</text></g>;
-}
-
-function FiveSvgRow({ value, y, end, rowIndex, step, xs }) {
-  const start = end - value.length + 1;
-  return value.split('').map((number, index) => <FiveSvgDigit key={`${rowIndex}-${index}`} id={`row${rowIndex}-${index}`} x={xs[start + index]} y={y} value={number} step={step} />);
-}
-
-function FiveSvg({ step }) {
-  const xs = [116, 156, 196, 236, 276];
-  const ys = [178, 224, 270, 316, 362, 408, 454, 500];
-  const ends = [2, 2, 3, 3, 3, 4, 4, 4];
-  return <svg className="five-lite-svg" viewBox="0 0 340 530" role="img" aria-label="10368 ÷ 24 の筆算"><line x1="104" y1="78" x2="304" y2="78" /><path d="M96 82 C110 112 110 138 96 168" /><text className="divisor" x="80" y="130">24</text>{['q0', 'q1', 'q2'].map((id, index) => <FiveSvgDigit key={id} id={id} x={xs[index + 2]} y="54" value={step.q[index] || ''} step={step} />)}{'10368'.split('').map((value, index) => <FiveSvgDigit key={index} id={`d${index}`} x={xs[index]} y="130" value={value} step={step} />)}{step.rows.map((rowValue, index) => <FiveSvgRow key={index} value={rowValue} y={ys[index]} end={ends[index]} rowIndex={index} step={step} xs={xs} />)}{step.rows.length >= 1 && <line x1="152" y1="194" x2="216" y2="194" />}{step.rows.length >= 4 && <line x1="152" y1="332" x2="256" y2="332" />}{step.rows.length >= 7 && <line x1="192" y1="470" x2="296" y2="470" />}</svg>;
-}
-
-function FiveDigitLesson({ onBack }) {
-  const [index, setIndex] = useState(0);
-  const [choices, setChoices] = useState({});
-  const step = fiveSteps[index];
-  const chosen = choices[index];
-  const ok = chosen === step.a;
-  return <main className="five-lite">
-    <header className="hero">
-      <p className="eyebrow">算数デコーダー 5桁</p>
-      <h1>10368 ÷ 24</h1>
-      <p>筆算は同じ考え方のくり返しです。</p>
-    </header>
-    <section className="five-lite-card">
-      <p className="step-label">STEP {index + 1} / {fiveSteps.length} ・ {step.label}</p>
-      <CycleBar active={cycleLabelFor(step.label)} />
-      <h2>{step.t}</h2>
-      <FiveSvg step={step} />
-      <nav className="five-lite-actions">
-        <button type="button" onClick={() => setIndex((value) => Math.max(0, value - 1))} disabled={index === 0}>前へ</button>
-        <button type="button" className="primary" onClick={() => ok && setIndex((value) => Math.min(fiveSteps.length - 1, value + 1))} disabled={index === fiveSteps.length - 1 || !ok}>次へ</button>
-        <button type="button" onClick={() => { setChoices({}); setIndex(0); }}>最初から</button>
-      </nav>
-      <section className="five-lite-check">
-        <p className="step-label">確認してから次へ</p>
-        <h3>{step.ask}</h3>
-        <div className="five-lite-choices">{step.c.map((choice) => <button key={choice} type="button" className={cx('five-lite-choice', chosen === choice && (choice === step.a ? 'ok' : 'ng'))} onClick={() => setChoices((previous) => ({ ...previous, [index]: choice }))}>{choice}</button>)}</div>
-        {chosen && <p>{ok ? '正解です。' : 'もう一度見てみましょう。'}</p>}
-      </section>
-      <section className="five-lite-note">
-        <h3>考え方</h3>
-        <p>{step.note}</p>
-      </section>
-      {index === 0 && <EstimateComparisonCard divisor={24} target={103} />}
-      <MultiplicationCard divisor={24} currentQ={step.q.slice(-1)} target={step.ask.includes('24×') ? step.a : undefined} />
-      <button type="button" className="five-lite-back" onClick={onBack}>問題選択へ戻る</button>
-    </section>
-  </main>;
 }
 
 function SvgDigit({ id, x, y, children, step }) {
@@ -247,7 +193,7 @@ function LongDivision({ step, problem }) {
   const currentRowIndex = step.rowIndex ?? 0;
   const visibleRows = problem.rows.slice(0, currentRowIndex + 1);
   const visibleQuotient = step.qSoFar ?? '';
-  const qStart = problem.rows[0]?.digitIndex - visibleQuotient.length + 1;
+  const qStart = problem.rows[0]?.digitIndex;
   const currentRowWork = step.label === 'かける' ? 'product' : step.label === 'ひく' || step.label === '完成' ? 'remainder' : 'none';
   const visibleWorkForRow = (rowIndex) => {
     if (rowIndex < currentRowIndex) return 'remainder';
@@ -265,10 +211,13 @@ function LongDivision({ step, problem }) {
       const visibleWork = visibleWorkForRow(index);
       const showProduct = visibleWork === 'product' || visibleWork === 'remainder';
       const showRemainder = visibleWork === 'remainder';
+      const showDown = index < currentRowIndex && row.downDigit;
       return <g key={`${row.digitIndex}-${index}`}>
         {showProduct && row.product.split('').map((digit, digitIndex) => <SvgDigit key={`p-${digitIndex}`} id={`product-${row.digitIndex}-${digitIndex}`} x={xs[productStart + digitIndex]} y={rowY(index)} step={step}>{digit}</SvgDigit>)}
         {showRemainder && <line className="division-line" x1={xs[Math.max(0, productStart)] - 18} y1={rowY(index, 15)} x2={xs[row.digitIndex] + 20} y2={rowY(index, 15)} />}
         {showRemainder && row.remainder.split('').map((digit, digitIndex) => <SvgDigit key={`r-${digitIndex}`} id={`remainder-${row.digitIndex}-${digitIndex}`} x={xs[Math.max(0, remStart + digitIndex)]} y={rowY(index, 54)} step={step}>{digit}</SvgDigit>)}
+        {showDown && <SvgDigit id={`down-${row.digitIndex}`} x={xs[row.digitIndex + 1]} y={rowY(index, 54)} step={step}>{row.downDigit}</SvgDigit>}
+        {showDown && step.label === 'おろす' && index === currentRowIndex - 1 && <path className="down-arrow" d={`M${xs[row.digitIndex + 1]} 150 V${rowY(index, 8)} m-7 -10 l7 10 7 -10`} />}
       </g>;
     })}
   </svg></div>;
@@ -285,7 +234,7 @@ function Visual({ visual }) {
   if (visual.type === 'estimate') return <EstimateComparisonCard divisor={visual.divisor} target={visual.target} />;
   if (visual.type === 'blocks') return <><Blocks total={visual.total} group={visual.group} remainder={visual.remainder} /><p>{visual.note}</p></>;
   if (visual.type === 'groups') return <><Blocks total={visual.total} group={visual.group} count={visual.count} /><p>{visual.note}</p></>;
-  if (visual.type === 'combine') return <><div className="combine strong-combine"><span>{visual.left}</span><span>＋</span><span>{visual.right}</span><span>→</span><strong>{visual.result}</strong></div><p>{visual.note}</p></>;
+  if (visual.type === 'combine') return <><div className="combine strong-combine"><span>{visual.left}</span><span>の右に</span><span>{visual.right}</span><span>→</span><strong>{visual.result}</strong></div><p>{visual.note}</p></>;
   if (visual.type === 'flow') return <><div className="flow"><span>見る</span><span>たてる</span><span>かける</span><span>ひく</span><span>おろす</span></div><p>{visual.note}</p></>;
   return <p>{visual.note}</p>;
 }
@@ -295,6 +244,7 @@ function currentQuotientFor(step, problem) {
     return problem.rows[step.rowIndex ?? 0]?.q ?? '';
   }
   if (step.check?.question.includes('何回')) return step.check.answer;
+  if (step.label === 'おろす') return '';
   if (step.qSoFar) return step.qSoFar.slice(-1);
   return '';
 }
@@ -325,8 +275,11 @@ function App() {
   const [dividendInput, setDividendInput] = useState(problems[0].dividend);
   const [divisorInput, setDivisorInput] = useState(String(problems[0].divisor));
   const [inputError, setInputError] = useState('');
+  const [customInput, setCustomInput] = useState(null);
+  const lessonRef = useRef(null);
+  const shouldScroll = useRef(false);
   const selectedProblem = problems.find((item) => item.id === problemId) ?? problems[0];
-  const problem = useMemo(() => problemId === 'custom' ? buildDivisionProblem(dividendInput, divisorInput) : buildDivisionProblem(selectedProblem.dividend, String(selectedProblem.divisor)), [dividendInput, divisorInput, problemId, selectedProblem]);
+  const problem = useMemo(() => problemId === 'custom' ? buildDivisionProblem(customInput.dividend, customInput.divisor) : buildDivisionProblem(selectedProblem.dividend, String(selectedProblem.divisor)), [customInput, problemId, selectedProblem]);
   const steps = useMemo(() => problem.error ? [] : stepsFor(problem), [problem]);
   const displayError = inputError || problem.error;
 
@@ -336,7 +289,21 @@ function App() {
   const canGoNext = step && (!step.check || choice === step.check.answer);
   const progress = steps.length ? Math.round(((index + 1) / steps.length) * 100) : 0;
 
+  useEffect(() => {
+    if (shouldScroll.current) {
+      lessonRef.current?.scrollIntoView({ block: 'start', behavior: 'instant' });
+      shouldScroll.current = false;
+    }
+  }, [index, problem]);
+
+  function goToStep(nextIndex) {
+    shouldScroll.current = true;
+    setIndex(nextIndex);
+    if (nextIndex === index) lessonRef.current?.scrollIntoView({ block: 'start', behavior: 'instant' });
+  }
+
   function selectProblem(id) {
+    shouldScroll.current = true;
     const sample = problems.find((item) => item.id === id);
     if (sample) {
       setDividendInput(sample.dividend);
@@ -352,6 +319,8 @@ function App() {
     const error = validateDivisionInput(dividendInput, divisorInput);
     setInputError(error);
     if (!error) {
+      shouldScroll.current = true;
+      setCustomInput({ dividend: dividendInput, divisor: divisorInput });
       setProblemId('custom');
       setChoices({});
       setIndex(0);
@@ -359,6 +328,7 @@ function App() {
   }
 
   return <main className={cx('app', problem.dividend?.length === 4 && 'four-digit-active')}>
+    {import.meta.env.BASE_URL !== "/" && <p className="lab-return"><a href="../">← Nemoto Works LABへ</a></p>}
     <header className="hero">
       <p className="eyebrow">算数デコーダー MVP</p>
       <h1>見えない考え方を、見える形に。</h1>
@@ -366,7 +336,7 @@ function App() {
     </header>
     <ProblemSelector currentProblemId={problemId === 'custom' && problem.id ? problem.id : problemId} onSelect={selectProblem} dividendInput={dividendInput} divisorInput={divisorInput} onDividendInput={setDividendInput} onDivisorInput={setDivisorInput} onStart={startCustomProblem} inputError={displayError} />
     {step && <>
-      <section className="card lesson-card">
+      <section className="card lesson-card" ref={lessonRef}>
         <div className="lesson-head">
           <div>
             <p className="step-label">{problem.label} ・ STEP {index + 1} / {steps.length} ・ {step.label}</p>
@@ -377,9 +347,9 @@ function App() {
         <CycleBar active={cycleLabelFor(step.label)} />
         <div className="paper-panel"><LongDivision step={step} problem={problem} /></div>
         <nav className="actions">
-          <button type="button" onClick={() => setIndex((value) => Math.max(0, value - 1))} disabled={index === 0}>前へ</button>
-          <button type="button" className="primary" onClick={() => canGoNext && setIndex((value) => Math.min(steps.length - 1, value + 1))} disabled={index === steps.length - 1 || !canGoNext}>次へ</button>
-          <button type="button" onClick={() => setIndex(0)}>最初から</button>
+          <button type="button" onClick={() => goToStep(Math.max(0, index - 1))} disabled={index === 0}>前へ</button>
+          <button type="button" className={cx("primary", !canGoNext && "needs-check")} onClick={() => canGoNext && goToStep(Math.min(steps.length - 1, index + 1))} disabled={index === steps.length - 1 || !canGoNext}>{index === steps.length - 1 ? '完了' : '次へ'}</button>
+          <button type="button" onClick={() => { setChoices({}); goToStep(0); }}>最初から</button>
         </nav>
         <CheckCard check={step.check} choice={choice} onChoice={(value) => setChoices((previous) => ({ ...previous, [key]: value }))} />
         <div className="explain-panel">
