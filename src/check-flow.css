@@ -52,7 +52,7 @@
   opacity: .75;
 }
 
-.actions button.primary:disabled::after {
+.actions button.primary.needs-check:disabled::after {
   content: "（確認してね）";
   display: block;
   font-size: 11px;

@@ -326,3 +326,6 @@ button:disabled { opacity: .35; }
     align-items: end;
   }
 }
+
+.lesson-card { scroll-margin-top: 16px; }
+.down-arrow { fill: none; stroke: #2563eb; stroke-width: 3; stroke-dasharray: 5 4; }
